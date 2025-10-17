@@ -1,0 +1,18 @@
+<table>
+    <tr>
+        <th>Card Name</th>
+        <th>Card Type</th>
+    </tr>
+    @for (card of store.cards(); track $index) {
+        <tr>
+            <td>{{card.name}}</td>
+            <td>{{card.type}}</td>
+        </tr>
+
+    }
+</table>
+
+
+<pre><code>
+    Quantity of Spell Cards => {{store.spellCards() | json}}
+</code></pre>

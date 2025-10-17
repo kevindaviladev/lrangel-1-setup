@@ -1,0 +1,17 @@
+:host {
+    display: block;
+    background: yellow;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin: 16px;
+    max-width: 400px;
+    font-family: system-ui, -apple-system, sans-serif;
+  }
+  
+  :host:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    transition: all 0.2s ease;
+  }
+  
