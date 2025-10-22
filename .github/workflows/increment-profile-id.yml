@@ -3,7 +3,7 @@ name: Auto Increment Profile ID
 on:
   push:
     branches:
-      - '**'  # Triggers on push to any branch
+      - 'master'  # Only trigger on master branch
     paths:
       - '1 - setup/src/**'  # Only trigger on source code changes
       - '!1 - setup/src/environments/**'  # Exclude environment files to avoid loops
