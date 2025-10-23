@@ -17,4 +17,11 @@ export class Web1 {
       alert('Hey!');
     }, 3000);
   }
+
+  computePropsII() {
+    console.log('computing II...');
+    setTimeout(() => {
+      alert('Hey II!');
+    }, 1000);
+  }
 }
