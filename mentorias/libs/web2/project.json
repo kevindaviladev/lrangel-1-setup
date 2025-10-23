@@ -1,0 +1,21 @@
+{
+  "name": "web2",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/web2/src",
+  "prefix": "lib",
+  "projectType": "library",
+  "tags": ["web"],
+  "targets": {
+    "test": {
+      "executor": "@nx/jest:jest",
+      "outputs": ["{workspaceRoot}/coverage/{projectRoot}"],
+      "options": {
+        "jestConfig": "libs/web2/jest.config.ts",
+        "tsConfig": "libs/web2/tsconfig.spec.json"
+      }
+    },
+    "lint": {
+      "executor": "@nx/eslint:lint"
+    }
+  }
+}

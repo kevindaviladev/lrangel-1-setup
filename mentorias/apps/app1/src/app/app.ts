@@ -1,9 +1,11 @@
 import { Component } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { Card } from '@mentorias/ui-components';
+import { Web1 } from '@mentorias/web1';
+import { Web2 } from '@mentorias/web2';
+import { Web3 } from '@mentorias/web3';
 
 @Component({
-  imports: [Card, RouterModule],
+  imports: [RouterModule, Web1, Web2, Web3],
   selector: 'app-root',
   templateUrl: './app.html',
   styleUrl: './app.scss',

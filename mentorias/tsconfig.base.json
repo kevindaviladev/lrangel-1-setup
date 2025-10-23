@@ -15,7 +15,10 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@mentorias/ui-components": ["libs/ui-components/src/index.ts"]
+      "@mentorias/ui-components": ["libs/ui-components/src/index.ts"],
+      "@mentorias/web1": ["libs/web1/src/index.ts"],
+      "@mentorias/web2": ["libs/web2/src/index.ts"],
+      "@mentorias/web3": ["libs/web3/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]
