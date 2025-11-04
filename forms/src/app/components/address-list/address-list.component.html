@@ -1,0 +1,47 @@
+<div class="address-list">
+  <div class="header">
+    <h3>Direcciones</h3>
+    <button 
+      type="button" 
+      class="btn-add"
+      (click)="addAddress()"
+    >
+      + Añadir Dirección
+    </button>
+  </div>
+
+  <!-- Lista de direcciones -->
+  @if (addresses.length === 0) {
+    <div class="empty-state">
+      <p>No hay direcciones. Haz clic en "Añadir Dirección" para empezar.</p>
+    </div>
+  }
+
+  @if (addresses.length > 0) {
+    <div class="addresses-container">
+      @for (addressControl of addresses; track $index) {
+        <div class="address-item">
+          <div class="address-header">
+            <span class="address-number">Dirección {{ $index + 1 }}</span>
+            <button 
+              type="button"
+              class="btn-remove"
+              (click)="removeAddress($index)"
+              title="Eliminar dirección"
+            >
+              🗑️ Eliminar
+            </button>
+          </div>
+          
+          <!-- 
+            Aquí usamos AddressFormComponent como CVA
+            El formControl se vincula automáticamente con el control del FormArray
+            Usamos $any() para evitar problemas de tipado con AbstractControl
+          -->
+          <app-address-form [formControl]="$any(addressControl)"></app-address-form>
+        </div>
+      }
+    </div>
+  }
+</div>
+

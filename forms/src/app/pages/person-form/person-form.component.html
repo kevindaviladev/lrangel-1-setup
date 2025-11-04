@@ -1,0 +1,150 @@
+<div class="person-form-page">
+  <div class="container">
+    <!-- Header -->
+    <header class="page-header">
+      <h1>📋 Formulario Avanzado de Persona</h1>
+      <p class="subtitle">
+        Demostración de <strong>ControlValueAccessor</strong>, <strong>FormArray</strong> y <strong>carga desde JSON</strong>
+      </p>
+    </header>
+
+    <!-- Botones de acción superior -->
+    <div class="action-buttons">
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        (click)="loadMockData()"
+      >
+        📥 Cargar Datos de Ejemplo
+      </button>
+      
+      <button 
+        type="button" 
+        class="btn btn-secondary"
+        (click)="clearForm()"
+      >
+        🗑️ Limpiar Formulario
+      </button>
+
+      <button 
+        type="button" 
+        class="btn btn-info"
+        (click)="exportAsJson()"
+      >
+        💾 Exportar JSON
+      </button>
+    </div>
+
+    <!-- Formulario Principal -->
+    <form [formGroup]="personForm" (ngSubmit)="onSubmit()" class="main-form">
+      
+      <!-- Sección 1: Información Básica -->
+      <section class="form-section">
+        <!--
+          BasicInfoFieldset es un CVA personalizado
+          Se usa con formControlName y maneja internamente su propio FormGroup
+        -->
+        <app-basic-info-fieldset formControlName="basicInfo"></app-basic-info-fieldset>
+      </section>
+
+      <!-- Sección 2: Direcciones -->
+      <section class="form-section">
+        <!--
+          AddressList es un CVA que gestiona un FormArray
+          Internamente usa AddressForm (otro CVA) para cada dirección
+          Este es el patrón CVA + FormArray en acción
+        -->
+        <app-address-list formControlName="addresses"></app-address-list>
+      </section>
+
+      <!-- Información del estado del formulario -->
+      <div class="form-status">
+        <div class="status-item" [class.valid]="isFormValid" [class.invalid]="!isFormValid">
+          <span class="status-label">Estado:</span>
+          <span class="status-value">
+            {{ isFormValid ? '✅ Válido' : '❌ Inválido' }}
+          </span>
+        </div>
+        
+        <div class="status-item">
+          <span class="status-label">Direcciones:</span>
+          <span class="status-value">
+            {{ (personForm.get('addresses')?.value?.length || 0) }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Botón Submit -->
+      <div class="submit-section">
+        <button 
+          type="submit" 
+          class="btn btn-primary btn-large"
+        >
+          🚀 Enviar Formulario
+        </button>
+        
+        <p class="help-text">
+          Los datos se mostrarán en la consola del navegador
+        </p>
+      </div>
+    </form>
+
+    <!-- Modal/Panel para mostrar el JSON -->
+    @if (showFormValue) {
+      <div class="json-overlay" (click)="closeJsonView()">
+        <div class="json-panel" (click)="$event.stopPropagation()">
+          <div class="json-header">
+            <h3>📄 Datos del Formulario (JSON)</h3>
+            <button 
+              type="button" 
+              class="btn-close"
+              (click)="closeJsonView()"
+            >
+              ✕
+            </button>
+          </div>
+          <pre class="json-content">{{ formJsonValue }}</pre>
+          <div class="json-footer">
+            <button 
+              type="button" 
+              class="btn btn-secondary"
+              (click)="closeJsonView()"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Información educativa -->
+    <footer class="page-footer">
+      <div class="info-box">
+        <h3>💡 Conceptos demostrados</h3>
+        <ul>
+          <li>
+            <strong>ControlValueAccessor (CVA):</strong> 
+            BasicInfoFieldset, AddressForm y AddressList son componentes CVA personalizados
+          </li>
+          <li>
+            <strong>FormArray Dinámico:</strong> 
+            Añade/elimina direcciones dinámicamente con validación
+          </li>
+          <li>
+            <strong>Carga desde JSON:</strong> 
+            Usa "Cargar Datos de Ejemplo" para ver cómo se inicializa desde JSON
+          </li>
+          <li>
+            <strong>Validación:</strong> 
+            Los CVA propagan validaciones al formulario padre
+          </li>
+          <li>
+            <strong>Composición:</strong> 
+            AddressList usa AddressForm (CVA dentro de CVA)
+          </li>
+        </ul>
+      </div>
+    </footer>
+  </div>
+</div>
+

@@ -1,0 +1,85 @@
+name: Auto Increment Profile ID
+
+on:
+  push:
+    branches:
+      - 'master'  # Only trigger on master branch
+    paths:
+      - '1 - setup/src/**'  # Only trigger on source code changes
+      - '!1 - setup/src/environments/**'  # Exclude environment files to avoid loops
+
+jobs:
+  increment-profile-id:
+    runs-on: ubuntu-latest
+    
+    # Skip if commit message contains [skip ci] or was made by github-actions bot
+    if: "!contains(github.event.head_commit.message, '[skip ci]') && github.actor != 'github-actions[bot]'"
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      
+      - name: Read current Profile ID and increment
+        id: increment
+        run: |
+          cd "1 - setup"
+          
+          # Read current profileID from environment.ts
+          CURRENT_ID=$(grep -oP 'profileID:\s*\K\d+' src/environments/environment.ts)
+          
+          if [ -z "$CURRENT_ID" ]; then
+            echo "Error: Could not read profileID from environment.ts"
+            exit 1
+          fi
+          
+          # Increment by 1
+          NEW_ID=$((CURRENT_ID + 1))
+          
+          echo "Current Profile ID: $CURRENT_ID"
+          echo "New Profile ID: $NEW_ID"
+          
+          # Export for next steps
+          echo "current_id=$CURRENT_ID" >> $GITHUB_OUTPUT
+          echo "new_id=$NEW_ID" >> $GITHUB_OUTPUT
+      
+      - name: Update environment files
+        run: |
+          cd "1 - setup"
+          NEW_ID=${{ steps.increment.outputs.new_id }}
+          
+          # Update both environment files
+          sed -i "s/profileID: [0-9]*/profileID: $NEW_ID/" src/environments/environment.ts
+          sed -i "s/profileID: [0-9]*/profileID: $NEW_ID/" src/environments/environment.development.ts
+          
+          echo "✓ Updated profileID to $NEW_ID in both environment files"
+      
+      - name: Commit and push changes
+        run: |
+          git add "1 - setup/src/environments/"
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          git commit -m "chore: auto-increment profileID to ${{ steps.increment.outputs.new_id }} [skip ci]"
+          git push
+      
+      - name: Summary
+        run: |
+          echo "## Profile ID Update Summary 🚀" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous ID**: ${{ steps.increment.outputs.current_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New ID**: ${{ steps.increment.outputs.new_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+

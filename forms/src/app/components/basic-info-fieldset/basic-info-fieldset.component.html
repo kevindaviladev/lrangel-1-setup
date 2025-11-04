@@ -1,0 +1,68 @@
+<fieldset class="basic-info-fieldset">
+  <legend>Información Básica</legend>
+  
+  <form [formGroup]="form">
+    <div class="form-row">
+      <!-- Campo: Nombre -->
+      <div class="form-field">
+        <label for="firstName">Nombre</label>
+        <input 
+          id="firstName"
+          type="text" 
+          formControlName="firstName"
+          placeholder="Ingrese su nombre"
+        />
+      </div>
+
+      <!-- Campo: Apellido -->
+      <div class="form-field">
+        <label for="lastName">Apellido</label>
+        <input 
+          id="lastName"
+          type="text" 
+          formControlName="lastName"
+          placeholder="Ingrese su apellido"
+        />
+      </div>
+    </div>
+
+    <!-- Campo: Email -->
+    <div class="form-field">
+      <label for="email">Email</label>
+      <input 
+        id="email"
+        type="email" 
+        formControlName="email"
+        placeholder="ejemplo@email.com"
+      />
+    </div>
+
+    <!-- Campo: Género (Radio buttons) -->
+    <div class="form-field">
+      <label>Género</label>
+      <div class="radio-group">
+        @for (option of genderOptions; track option.value) {
+          <label class="radio-label">
+            <input 
+              type="radio" 
+              [value]="option.value"
+              formControlName="gender"
+            />
+            {{ option.label }}
+          </label>
+        }
+      </div>
+    </div>
+
+    <!-- Campo: Fecha de Nacimiento -->
+    <div class="form-field">
+      <label for="birthDate">Fecha de Nacimiento</label>
+      <input 
+        id="birthDate"
+        type="date" 
+        formControlName="birthDate"
+      />
+    </div>
+  </form>
+</fieldset>
+

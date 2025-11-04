@@ -1,0 +1,87 @@
+name: Manual Increment Profile ID
+
+on:
+  workflow_dispatch:
+    inputs:
+      increment_by:
+        description: 'Increment profile ID by this amount (default: 1)'
+        required: false
+        default: '1'
+        type: string
+
+jobs:
+  increment-profile-id:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+      
+      - name: Configure Git
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+      
+      - name: Read current Profile ID and increment
+        id: increment
+        run: |
+          cd "1 - setup"
+          
+          # Read current profileID from environment.ts
+          CURRENT_ID=$(grep -oP 'profileID:\s*\K\d+' src/environments/environment.ts)
+          
+          if [ -z "$CURRENT_ID" ]; then
+            echo "Error: Could not read profileID from environment.ts"
+            exit 1
+          fi
+          
+          # Increment by specified amount
+          INCREMENT_BY=${{ github.event.inputs.increment_by || 1 }}
+          NEW_ID=$((CURRENT_ID + INCREMENT_BY))
+          
+          echo "Current Profile ID: $CURRENT_ID"
+          echo "Incrementing by: $INCREMENT_BY"
+          echo "New Profile ID: $NEW_ID"
+          
+          # Export for next steps
+          echo "current_id=$CURRENT_ID" >> $GITHUB_OUTPUT
+          echo "new_id=$NEW_ID" >> $GITHUB_OUTPUT
+          echo "increment_by=$INCREMENT_BY" >> $GITHUB_OUTPUT
+      
+      - name: Update environment files
+        run: |
+          cd "1 - setup"
+          NEW_ID=${{ steps.increment.outputs.new_id }}
+          
+          # Update both environment files
+          sed -i "s/profileID: [0-9]*/profileID: $NEW_ID/" src/environments/environment.ts
+          sed -i "s/profileID: [0-9]*/profileID: $NEW_ID/" src/environments/environment.development.ts
+          
+          echo "✓ Updated profileID to $NEW_ID in both environment files"
+      
+      - name: Commit and push changes
+        run: |
+          git add "1 - setup/src/environments/"
+          
+          # Check if there are changes to commit
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+            exit 0
+          fi
+          
+          git commit -m "chore: manually increment profileID to ${{ steps.increment.outputs.new_id }} [skip ci]"
+          git push
+      
+      - name: Summary
+        run: |
+          echo "## Profile ID Manual Update Summary 🎯" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Previous ID**: ${{ steps.increment.outputs.current_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Increment By**: +${{ steps.increment.outputs.increment_by }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **New ID**: ${{ steps.increment.outputs.new_id }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Triggered by**: @${{ github.actor }}" >> $GITHUB_STEP_SUMMARY
+

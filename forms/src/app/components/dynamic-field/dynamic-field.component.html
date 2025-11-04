@@ -1,0 +1,81 @@
+<div class="dynamic-field">
+  <label [for]="schema.name">
+    {{ schema.label }}
+    @if (schema.required) {
+      <span class="required">*</span>
+    }
+  </label>
+
+  <!-- Renderizado condicional según el tipo de campo -->
+
+  <!-- Input de texto -->
+  @if (schema.type === 'text' || schema.type === 'email' || schema.type === 'number') {
+    <input 
+      [id]="schema.name"
+      [type]="schema.type"
+      [formControl]="control"
+      [placeholder]="schema.placeholder || ''"
+      [class.invalid]="showError"
+    />
+  }
+
+  <!-- Input de fecha -->
+  @if (schema.type === 'date') {
+    <input 
+      [id]="schema.name"
+      type="date"
+      [formControl]="control"
+      [class.invalid]="showError"
+    />
+  }
+
+  <!-- Select -->
+  @if (schema.type === 'select') {
+    <select 
+      [id]="schema.name"
+      [formControl]="control"
+      [class.invalid]="showError"
+    >
+      <option value="">Seleccione una opción</option>
+      @for (option of schema.options; track option.value) {
+        <option [value]="option.value">{{ option.label }}</option>
+      }
+    </select>
+  }
+
+  <!-- Checkbox -->
+  @if (schema.type === 'checkbox') {
+    <div class="checkbox-wrapper">
+      <input 
+        [id]="schema.name"
+        type="checkbox"
+        [formControl]="control"
+      />
+      <span>{{ schema.placeholder || schema.label }}</span>
+    </div>
+  }
+
+  <!-- Radio buttons -->
+  @if (schema.type === 'radio') {
+    <div class="radio-group">
+      @for (option of schema.options; track option.value) {
+        <label class="radio-label">
+          <input 
+            type="radio"
+            [value]="option.value"
+            [formControl]="control"
+          />
+          {{ option.label }}
+        </label>
+      }
+    </div>
+  }
+
+  <!-- Mensaje de error -->
+  @if (showError) {
+    <div class="error-message">
+      {{ errorMessage }}
+    </div>
+  }
+</div>
+

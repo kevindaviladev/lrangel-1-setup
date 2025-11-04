@@ -1,0 +1,143 @@
+image: node:20
+
+stages:
+  - install
+  - test
+  - build
+  - deploy
+
+cache:
+  key:
+    files:
+      - package-lock.json
+  paths:
+    - node_modules/
+    - .nx/cache
+
+# Install dependencies
+install:
+  stage: install
+  script:
+    - npm ci
+    # Fetch para que NX pueda comparar con main
+    - git fetch origin main:main || true
+  artifacts:
+    paths:
+      - node_modules/
+    expire_in: 1 hour
+
+# Test solo proyectos affected (ahorra tiempo de CI)
+test:affected:
+  stage: test
+  needs:
+    - install
+  script:
+    - echo "Running tests for affected projects..."
+    - AFFECTED_PROJECTS=$(npx nx show projects --affected --base=origin/main)
+    - echo "Affected projects:"
+    - echo "$AFFECTED_PROJECTS"
+    - |
+      if [ -z "$AFFECTED_PROJECTS" ]; then
+        echo "No affected projects found, skipping tests"
+      else
+        for project in $AFFECTED_PROJECTS; do
+          echo "=========================================="
+          echo "Running tests for project: $project"
+          echo "=========================================="
+          npx nx test $project
+        done
+      fi
+  allow_failure: false
+  only:
+    - main
+    - merge_requests
+
+# Build solo apps affected
+build:affected-apps:
+  stage: build
+  needs:
+    - install
+    - test:affected
+  script:
+    - echo "Finding affected apps to build..."
+    - AFFECTED_APPS=$(npx nx show projects --affected --base=origin/main --with-target build)
+    - echo "Affected apps:"
+    - echo "$AFFECTED_APPS"
+    - |
+      if [ -z "$AFFECTED_APPS" ]; then
+        echo "No affected apps found, skipping build."
+        mkdir -p dist/apps
+      else
+        AFFECTED_LIST=$(echo "$AFFECTED_APPS" | tr '\n' ',' | sed 's/,$//')
+        echo "Building affected applications: $AFFECTED_LIST"
+        npx nx run-many --target=build --projects=$AFFECTED_LIST --configuration=production --parallel=3
+      fi
+  artifacts:
+    paths:
+      - dist/
+    expire_in: 1 hour
+
+# Deploy apps a GitLab Pages
+pages:
+  stage: deploy
+  needs:
+    - build:affected-apps
+  script:
+    - echo "Preparing deployment for GitLab Pages..."
+    - mkdir -p public
+    - |
+      # Start the index.html file
+      cat > public/index.html << 'EOF'
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>Applications</title>
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            max-width: 600px; 
+            margin: 50px auto; 
+            padding: 20px;
+          }
+          h1 { color: #333; }
+          a { 
+            display: block; 
+            padding: 15px; 
+            margin: 10px 0; 
+            background: #f0f0f0; 
+            text-decoration: none; 
+            color: #333; 
+            border-radius: 5px;
+            transition: background 0.3s;
+          }
+          a:hover { background: #e0e0e0; }
+        </style>
+      </head>
+      <body>
+        <h1>Deployed Applications</h1>
+      EOF
+
+      # Add links for apps that were actually built
+      for app in app1 app2 app3; do
+        if [ -d "dist/apps/$app/browser" ]; then
+          echo "Found built app: $app. Copying to public directory."
+          cp -r "dist/apps/$app/browser" "public/$app"
+          echo "        <a href='/$app/'>Application ${app#app}</a>" >> public/index.html
+        else
+          echo "Skipping $app: not found in build artifacts."
+        fi
+      done
+
+      # Finish the index.html file
+      cat >> public/index.html << 'EOF'
+      </body>
+      </html>
+      EOF
+    - echo "Deployment package created."
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+
+

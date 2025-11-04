@@ -1,0 +1,47 @@
+<div class="address-form" [formGroup]="form">
+  <!-- Campo: Calle -->
+  <div class="form-field">
+    <label for="street">Calle</label>
+    <input 
+      id="street"
+      type="text" 
+      formControlName="street"
+      placeholder="Ej: Calle Principal 123"
+    />
+  </div>
+
+  <!-- Fila con Ciudad y País -->
+  <div class="form-row">
+    <div class="form-field">
+      <label for="city">Ciudad</label>
+      <input 
+        id="city"
+        type="text" 
+        formControlName="city"
+        placeholder="Ej: Madrid"
+      />
+    </div>
+
+    <div class="form-field">
+      <label for="country">País</label>
+      <select id="country" formControlName="country">
+        <option value="">Seleccione un país</option>
+        @for (country of countries; track country) {
+          <option [value]="country">{{ country }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <!-- Campo: Código Postal -->
+  <div class="form-field">
+    <label for="postalCode">Código Postal</label>
+    <input 
+      id="postalCode"
+      type="text" 
+      formControlName="postalCode"
+      placeholder="Ej: 28001"
+    />
+  </div>
+</div>
+
